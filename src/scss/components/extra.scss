@@ -1,0 +1,18 @@
+.example-ul {
+	display: block;
+	text-align: center;
+	margin-top: 100px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	a {
+		font-size: 40px;
+		font-weight: 700;
+		color: blue;
+
+		&:hover {
+			color: green;
+		}
+	}
+}

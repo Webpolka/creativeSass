@@ -108,6 +108,117 @@ class Needle {
 
 		this.viTimer;
 		this.txtTimer;
+
+		// Привязываем контекст this к методу
+		this.onResize = this.onResize.bind(this);
+
+		// Слушаем resize
+		window.addEventListener("resize", this.onResize);
+
+		// Вызовем сразу при инициализации
+		this.onResize();
+	}
+	onResize() {
+		// Общие
+		this.containerQueries(".creative-header_pulse", "font-size", 12, 4, 40);
+		this.containerQueries(".creative-header_pulse .pulse-icon", "width", 25, 10, 73);
+		this.containerQueries(".creative-header_question", "font-size", 11, 5, 50);
+		if (this.options.firm == "sber") {
+			this.containerQueries(".creative-header_question.sber-percent", "font-size", 20, 5, 60);
+		}
+		if (this.options.firm == "okko") {
+			this.containerQueries(".creative-header_question.okko-percent", "font-size", 20, 5, 60);
+		}
+		if (this.options.firm == "samolet") {
+			this.containerQueries(".creative-header_question.samolet-percent", "font-size", 20, 5, 60);
+		}
+
+		// Если 4/3
+		if (this.options.aspect == "4/3") {
+			this.containerQueries(".creative-tile", "padding-inline", 12, 5.2, 65);
+			this.containerQueries(".creative-tile", "padding-top", 10, 3.5, 50);
+			this.containerQueries(".creative-tile", "padding-bottom", 3, 2, 20);
+
+			this.containerQueries(".creative-taxo", "margin-top", 5, 1, 75);
+			this.containerQueries(".creative-taxo_arc", "max-width", 165, 57, 750);
+			this.containerQueries(".creative-taxo_arc", "margin-bottom", 2, 1, 30);
+
+			this.containerQueries(".creative-answers", "margin-top", 2, 1, 30);
+			this.containerQueries(".creative-answers", "margin-bottom", 5, 3, 50);
+			this.containerQueries(".creative-answers_left", "font-size", 11, 3.5, 40);
+			this.containerQueries(".creative-answers_right", "font-size", 11, 3.5, 40);
+
+			this.containerQueries(".creative-logo", "margin-bottom", 2, 1.5, 50);
+			if (this.options.firm == "sber") {
+				this.containerQueries(".creative-logo_link.sber", "max-width", 68, 20, 252);
+			}
+			if (this.options.firm == "okko") {
+				this.containerQueries(".creative-logo_link.okko", "max-width", 46, 16, 177);
+			}
+			if (this.options.firm == "samolet") {
+				this.containerQueries(".creative-logo_link.samolet", "max-width", 80, 26, 271);
+			}
+			this.containerQueries(".creative-footer", "padding-top", 6, 2, 22);
+			this.containerQueries(".creative-footer_programmatica", "width", 175, 42, 485);
+			this.containerQueries(".creative-footer_advertising span", "font-size", 12, 2.2, 25);
+			this.containerQueries(".creative-footer_advertising .btn-info", "width", 15, 3, 32);
+		}
+
+		// Если 16/9
+		if (this.options.aspect == "16/9") {
+			this.containerQueries(".creative-tile", "padding-inline", 12, 5.2, 65);
+			this.containerQueries(".creative-tile", "padding-top", 2, 0.5, 50);
+			this.containerQueries(".creative-tile", "padding-bottom", 3, 2, 20);
+
+			this.containerQueries(".creative-taxo", "margin-top", 5, 1, 75);
+			this.containerQueries(".creative-taxo_arc", "max-width", 130, 46, 950);
+			this.containerQueries(".creative-taxo_arc", "margin-bottom", 2, 1, 30);
+
+			this.containerQueries(".creative-answers", "margin-top", 2, 1, 30);
+			this.containerQueries(".creative-answers", "margin-bottom", 2, 1.2, 50);
+			this.containerQueries(".creative-answers_left", "font-size", 8, 2.5, 40);
+			this.containerQueries(".creative-answers_right", "font-size", 8, 2.5, 40);
+
+			this.containerQueries(".creative-logo", "margin-bottom", 2, 1, 50);
+			if (this.options.firm == "sber") {
+				this.containerQueries(".creative-logo_link.sber", "max-width", 45, 15, 252);
+			}
+			if (this.options.firm == "okko") {
+				this.containerQueries(".creative-logo_link.okko", "max-width", 29, 16, 177);
+			}
+			if (this.options.firm == "samolet") {
+				this.containerQueries(".creative-logo_link.samolet", "max-width", 70, 23, 271);
+			}
+			this.containerQueries(".creative-footer", "padding-top", 2, 1, 22);
+			this.containerQueries(".creative-footer_programmatica", "width", 150, 42, 485);
+			this.containerQueries(".creative-footer_advertising span", "font-size", 9, 1.5, 25);
+			this.containerQueries(".creative-footer_advertising .btn-info", "width", 10, 2, 32);
+		}
+	}
+	containerQueries(element, styling, min, cqw, max) {
+		let parent = this.creative.querySelector(".creative-tile");
+		let eles = this.creative.querySelectorAll(element);
+		let width = parent.offsetWidth;
+		let value = Math.max(min, Math.min((width / 100) * cqw, max));
+
+		let maxContWidth;
+		if (this.options.aspect == "4/3") {
+			maxContWidth = 1280;
+		}
+		if (this.options.aspect == "16/9") {
+			maxContWidth = 1920;
+		}
+
+		if (width <= 280) {
+			value = min;
+		}
+		if (width >= maxContWidth) {
+			value = max;
+		}
+		eles.forEach((ele) => {
+			ele.style.setProperty(styling, value + "px");
+		});
+		
 	}
 
 	// Настройки
@@ -680,21 +791,3 @@ class Needle {
 		console.log(localStorage.getItem("voice"), ' - сохранёно в LocalStorage по ключу "voice" !');
 	}
 }
-
-/*------------------------------------------------------------------------------------------------------------------------
-Инициализиpуем 6 креативов
---------------------------------------------------------------------------------------------------------------------------*/
-document.addEventListener("DOMContentLoaded", function () {
-	new Needle("#creative-sber", {
-		firm: "sber",
-		aspect: "4/3",
-	});
-	new Needle("#creative-okko", {
-		firm: "okko",
-		aspect: "4/3",
-	});
-	new Needle("#creative-samolet", {
-		firm: "samolet",
-		aspect: "4/3",
-	});
-});
