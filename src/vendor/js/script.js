@@ -4,8 +4,7 @@ class Needle {
 			firm: "samolet",
 			aspect: "4/3",
 			closeVideoDelayButtonShow: 5000,
-			
-			videoSource: "storage",			
+
 			sber: {
 				question: "Что важнее при оформлении автокредита?",
 				answerLeft: "Ежемесячный платеж",
@@ -17,7 +16,6 @@ class Needle {
 				segment4Link: "./images/sber/parts/part-4.svg",
 				segment5Link: "./images/sber/parts/part-5.svg",
 
-				videoVimeoId: "1099512100",
 				videoStorageLink: "https://storage.yandexcloud.net/creo/Sber/sber%20auto.mp4",
 
 				popupText: 'ООО "CБЕР маркет", ИНН 0000000000, ID a-000000',
@@ -35,8 +33,8 @@ class Needle {
 				segment4Link: "./images/okko/parts/part-4.svg",
 				segment5Link: "./images/okko/parts/part-5.svg",
 
-				videoVimeoId: "1099511491",
-				videoStorageLink: "https://storage.yandexcloud.net/creo/okko/%D0%9C%D0%98%D0%A0%2C%20%D0%9A%D0%9E%D0%A2%D0%9E%D0%A0%D0%AB%D0%99%20%D0%AF%20%D0%A1%D0%9C%D0%9E%D0%A2%D0%A0%D0%AE%20_%20Okko.mp4",
+				videoStorageLink:
+					"https://storage.yandexcloud.net/creo/okko/%D0%9C%D0%98%D0%A0%2C%20%D0%9A%D0%9E%D0%A2%D0%9E%D0%A0%D0%AB%D0%99%20%D0%AF%20%D0%A1%D0%9C%D0%9E%D0%A2%D0%A0%D0%AE%20_%20Okko.mp4",
 
 				popupText: 'ООО "OKKO интертеймент", ИНН 77999999999, ID a-99999',
 				logoLink: "https://okko.tv/",
@@ -53,7 +51,6 @@ class Needle {
 				segment4Link: "./images/samolet/parts/part-4.svg",
 				segment5Link: "./images/samolet/parts/part-5.svg",
 
-				videoVimeoId: "1099511894",
 				videoStorageLink: "https://storage.yandexcloud.net/creo/Samolet/_%D0%9C%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%80.mp4",
 
 				popupText: 'ООО "САМОЛЕТ продакшен", ИНН 99999999999, ID a-11111',
@@ -432,11 +429,7 @@ class Needle {
 	}
 
 	openVideo() {
-		if (this.options.videoSource == "vimeo") {
-			this.openVimeoVideo();
-		} else if (this.options.videoSource == "storage") {
-			this.openBrowserVideo();
-		}
+		this.openBrowserVideo();
 	}
 
 	// Открытие видео в HTML5
@@ -454,8 +447,8 @@ class Needle {
 		let videoCloseButton = this.videoCloseButton;
 
 		const video = this.browserPlayer;
-		
-		video && video.play();	
+
+		video && video.play();
 
 		// Событие окончания воспроизведения
 		video.addEventListener("ended", function () {
@@ -466,10 +459,10 @@ class Needle {
 
 		let hasActionFired = false;
 		// Флаг, чтобы действие выполнялось один раз
-		video.addEventListener("timeupdate", function () {						
+		video.addEventListener("timeupdate", function () {
 			if (!hasActionFired && video.currentTime >= closeVideoDelay / 1000) {
 				videoCloseButton.classList.add("show");
-				console.log('Прошла задержка');				
+				console.log("Прошла задержка");
 				hasActionFired = true;
 				// Сработало один раз
 			}
@@ -480,94 +473,6 @@ class Needle {
 				hasActionFired = false;
 			}
 		});
-	}
-
-	// Открытие видео в Vimmeo
-	openVimeoVideo() {
-		this.createVimeoVideo();
-		this.videoContainer = document.getElementById("videoContainer");
-		this.vimeoPlayer = this.videoContainer.querySelector("#vimeo-player");
-		this.videoCloseButton = this.videoContainer.querySelector(".videoCloseButton");
-
-		this.videoCloseButton.addEventListener("click", (e) => {
-			this.removeVideo();
-		});
-
-		const player = new Vimeo.Player(this.vimeoPlayer);
-
-		let closeVideoDelay = this.options.closeVideoDelayButtonShow;
-		let videoCloseButton = this.videoCloseButton;
-		player.on("play", function () {
-			console.log("Кнопка закрыть появиться через ", closeVideoDelay, " м/с");
-			setTimeout(() => {
-				videoCloseButton.classList.add("show");
-			}, closeVideoDelay);
-		});
-
-		// Пример: Слушаем событие "ended" (окончание видео)
-		player.on("ended", function () {
-			console.log("Видео на Vimeo закончилось!");
-			let ct = document.querySelector("#videoContainer");
-			ct && ct.remove();
-		});
-
-		player
-			.setVolume(0.5)
-			.then(function (volume) {
-				// громкость установлена на 0.5
-			})
-			.catch(function (error) {
-				switch (error.name) {
-					case "RangeError":
-						// значение громкости вне диапазона от 0 до 1
-						break;
-					default:
-						// какая-то другая ошибка
-						break;
-				}
-			});
-	}
-
-	// Создаем контейнер для Vimeo видео
-	createVimeoVideo() {
-		let videoId, landingLink;
-		if (this.options.firm == "sber") {
-			videoId = this.options.sber.videoVimeoId;
-			landingLink = this.options.sber.landingLink;
-		} else if (this.options.firm == "okko") {
-			videoId = this.options.okko.videoVimeoId;
-			landingLink = this.options.okko.landingLink;
-		} else if (this.options.firm == "samolet") {
-			videoId = this.options.samolet.videoVimeoId;
-			landingLink = this.options.samolet.landingLink;
-		}
-		let html = `
-		<div id="videoContainer">	
-			<iframe class="videoPlayerClass"
-  			  id="vimeo-player"
-    			src="https://player.vimeo.com/video/${videoId}?title=0&background=1&byline=0&portrait=0&autoplay=1"    		
-    			frameborder="0"
-    			allow="autoplay; fullscreen; picture-in-picture"
-    			allowfullscreen				
-			>			
-			</iframe>
-		<a href="${landingLink}" target="_blank" class="linkLayer">
-		</a>					
-		
-			<button class="videoCloseButton">
-					<svg fill="#000000" width="64px" height="64px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-						<g id="SVGRepo_bgCarrier" stroke-width="0"/>
-						<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-						<g id="SVGRepo_iconCarrier"> <path d="M18.8,16l5.5-5.5c0.8-0.8,0.8-2,0-2.8l0,0C24,7.3,23.5,7,23,7c-0.5,0-1,0.2-1.4,0.6L16,13.2l-5.5-5.5 c-0.8-0.8-2.1-0.8-2.8,0C7.3,8,7,8.5,7,9.1s0.2,1,0.6,1.4l5.5,5.5l-5.5,5.5C7.3,21.9,7,22.4,7,23c0,0.5,0.2,1,0.6,1.4 C8,24.8,8.5,25,9,25c0.5,0,1-0.2,1.4-0.6l5.5-5.5l5.5,5.5c0.8,0.8,2.1,0.8,2.8,0c0.8-0.8,0.8-2.1,0-2.8L18.8,16z"/> </g>
-					</svg>
-			</button>			
-		</div>`;
-
-		const video = document.querySelector("#videoContainer");
-		if (!video) {
-			const placement = this.creative.querySelector(".creative-tile");
-			placement.insertAdjacentHTML("beforeend", html);
-		}
 	}
 
 	// Создаем контейнер для HTML5 видео
