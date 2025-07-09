@@ -1,0 +1,77 @@
+/*-----------------------------------------------------------------------------------------------------------------------------
+Лайтбокс для видео 
+------------------------------------------------------------------------------------------------------------------------------*/
+#videoContainer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	overflow: hidden;
+	background: rgb(0, 0, 0, 0.8);
+	z-index: 100;
+}
+.linkLayer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 2;
+}
+
+#vimeo-player {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+	z-index: 1;
+}
+.videoCloseButton {
+	visibility: hidden;
+	opacity: 0;
+
+	&.show {
+		visibility: visible;
+		opacity: 1;
+	}
+
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translate(-100%, 100%);
+	border-radius: 50%;
+	border: 1px solid rgb(0, 0, 0, 0.15);
+
+	transition: all 0.2s ease-in-out;
+
+	aspect-ratio: 1/1;
+	width: clamp(18px, 5cqw, 45px);
+
+	background-color: #fff;
+
+	z-index: 15;
+
+	@include md {
+		transform: translate(-20px, 20px);
+	}
+
+	&:hover {
+		border: 1px solid rgb(0, 0, 0, 1);
+		svg {
+			opacity: 1;
+		}
+	}
+	svg {
+		opacity: 0.35;
+		width: 80%;
+		height: auto;
+		display: block;
+
+		margin-inline: auto;
+
+		transition: all 0.2s ease-in-out;
+	}
+}
