@@ -3,9 +3,9 @@ class Needle {
 		const defaultConfig = {
 			firm: "samolet",
 			aspect: "4/3",
-
-			videoSource: "html5",
 			closeVideoDelayButtonShow: 5000,
+			
+			videoSource: "storage",			
 			sber: {
 				question: "Что важнее при оформлении автокредита?",
 				answerLeft: "Ежемесячный платеж",
@@ -18,7 +18,7 @@ class Needle {
 				segment5Link: "./images/sber/parts/part-5.svg",
 
 				videoVimeoId: "1099512100",
-				videoBrowserLink: "./vendor/video/sber.mp4",
+				videoStorageLink: "https://storage.yandexcloud.net/creo/Sber/sber%20auto.mp4",
 
 				popupText: 'ООО "CБЕР маркет", ИНН 0000000000, ID a-000000',
 				logoLink: "https://sberauto.com/",
@@ -36,7 +36,7 @@ class Needle {
 				segment5Link: "./images/okko/parts/part-5.svg",
 
 				videoVimeoId: "1099511491",
-				videoBrowserLink: "./vendor/video/okko.mp4",
+				videoStorageLink: "https://storage.yandexcloud.net/creo/okko/%D0%9C%D0%98%D0%A0%2C%20%D0%9A%D0%9E%D0%A2%D0%9E%D0%A0%D0%AB%D0%99%20%D0%AF%20%D0%A1%D0%9C%D0%9E%D0%A2%D0%A0%D0%AE%20_%20Okko.mp4",
 
 				popupText: 'ООО "OKKO интертеймент", ИНН 77999999999, ID a-99999',
 				logoLink: "https://okko.tv/",
@@ -54,7 +54,7 @@ class Needle {
 				segment5Link: "./images/samolet/parts/part-5.svg",
 
 				videoVimeoId: "1099511894",
-				videoBrowserLink: "./vendor/video/samolet.mp4",
+				videoStorageLink: "https://storage.yandexcloud.net/creo/Samolet/_%D0%9C%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%80.mp4",
 
 				popupText: 'ООО "САМОЛЕТ продакшен", ИНН 99999999999, ID a-11111',
 				logoLink: "https://samolet.ru/",
@@ -434,7 +434,7 @@ class Needle {
 	openVideo() {
 		if (this.options.videoSource == "vimeo") {
 			this.openVimeoVideo();
-		} else if (this.options.videoSource == "html5") {
+		} else if (this.options.videoSource == "storage") {
 			this.openBrowserVideo();
 		}
 	}
@@ -450,22 +450,35 @@ class Needle {
 			this.removeVideo();
 		});
 
-		const player = this.browserPlayer;
-
 		let closeVideoDelay = this.options.closeVideoDelayButtonShow;
 		let videoCloseButton = this.videoCloseButton;
-		player.on("play", function () {
-			console.log("Кнопка закрыть появиться через ", closeVideoDelay, " м/с");
-			setTimeout(() => {
-				videoCloseButton.classList.add("show");
-			}, closeVideoDelay);
-		});
 
-		// Пример: Слушаем событие "ended" (окончание видео)
-		player.on("ended", function () {
-			console.log("Видео на Vimeo закончилось!");
+		const video = this.browserPlayer;
+		
+		video && video.play();	
+
+		// Событие окончания воспроизведения
+		video.addEventListener("ended", function () {
+			console.log("Видео закончилось!");
 			let ct = document.querySelector("#videoContainer");
 			ct && ct.remove();
+		});
+
+		let hasActionFired = false;
+		// Флаг, чтобы действие выполнялось один раз
+		video.addEventListener("timeupdate", function () {						
+			if (!hasActionFired && video.currentTime >= closeVideoDelay / 1000) {
+				videoCloseButton.classList.add("show");
+				console.log('Прошла задержка');				
+				hasActionFired = true;
+				// Сработало один раз
+			}
+		});
+		// Сброс флага при перемотке назад (например, пользователь возвращается к началу)
+		video.addEventListener("seeked", function () {
+			if (video.currentTime < closeVideoDelay / 1000) {
+				hasActionFired = false;
+			}
 		});
 	}
 
@@ -530,9 +543,9 @@ class Needle {
 		}
 		let html = `
 		<div id="videoContainer">	
-			<iframe
+			<iframe class="videoPlayerClass"
   			  id="vimeo-player"
-    			src="https://player.vimeo.com/video/${videoId}?title=0&byline=0&portrait=0&autoplay=1&muted=1&preload=auto"    		
+    			src="https://player.vimeo.com/video/${videoId}?title=0&background=1&byline=0&portrait=0&autoplay=1"    		
     			frameborder="0"
     			allow="autoplay; fullscreen; picture-in-picture"
     			allowfullscreen				
@@ -561,20 +574,23 @@ class Needle {
 	createBrowserVideo() {
 		let videoLink, landingLink;
 		if (this.options.firm == "sber") {
-			videoLink = this.options.sber.videoBrowserLink;
+			videoLink = this.options.sber.videoStorageLink;
 			landingLink = this.options.sber.landingLink;
 		} else if (this.options.firm == "okko") {
-			videoLink = this.options.okko.videoBrowserLink;
+			videoLink = this.options.okko.videoStorageLink;
 			landingLink = this.options.okko.landingLink;
 		} else if (this.options.firm == "samolet") {
-			videoLink = this.options.samolet.videoBrowserLink;
+			videoLink = this.options.samolet.videoStorageLink;
 			landingLink = this.options.samolet.landingLink;
 		}
 		let html = `
 		<div id="videoContainer">	
 		
-		<video id="#browser-player" controls>
-  			<source src="${videoLink}" type="video/mp4"> 
+		<video class="videoPlayerClass" id="browser-player" autoplay playsinline preload="auto" controls>
+  			<source 
+				src="${videoLink}" 				
+				type="video/mp4"
+			> 
    			Ваш браузер не поддерживает тег video.
    		</video>
 

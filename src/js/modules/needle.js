@@ -1,14 +1,26 @@
 export default class Needle {
-	constructor(options) {
+	constructor(elem, options) {
 		const defaultConfig = {
-			arrows: true,
 			firm: "samolet",
+			aspect: "4/3",
+			closeVideoDelayButtonShow: 5000,
+
+			videoSource: "storage",
 			sber: {
 				question: "Что важнее при оформлении автокредита?",
 				answerLeft: "Ежемесячный платеж",
 				answerRight: "Общая переплата",
-				videoLink: "./vendor/video/sber.mp4",
-				popupText: 'ООО "ХАВЕЙЛ МОТОР РУС", ИНН 7729763331, ID a-16835',
+				segment0Link: "./images/sber/parts/part-0.svg",
+				segment1Link: "./images/sber/parts/part-1.svg",
+				segment2Link: "./images/sber/parts/part-2.svg",
+				segment3Link: "./images/sber/parts/part-3.svg",
+				segment4Link: "./images/sber/parts/part-4.svg",
+				segment5Link: "./images/sber/parts/part-5.svg",
+
+				videoVimeoId: "1099512100",
+				videoStorageLink: "https://storage.yandexcloud.net/creo/Sber/sber%20auto.mp4",
+
+				popupText: 'ООО "CБЕР маркет", ИНН 0000000000, ID a-000000',
 				logoLink: "https://sberauto.com/",
 				landingLink: "https://sberauto.com/kredit-bez-pervogo-vznosa-sberavto",
 			},
@@ -16,7 +28,17 @@ export default class Needle {
 				question: "С кем предпочитаете смотреть фильмы?",
 				answerLeft: "В одиночестве",
 				answerRight: "В компании",
-				videoLink: "./vendor/video/okko.mp4",
+				segment0Link: "./images/okko/parts/part-0.svg",
+				segment1Link: "./images/okko/parts/part-1.svg",
+				segment2Link: "./images/okko/parts/part-2.svg",
+				segment3Link: "./images/okko/parts/part-3.svg",
+				segment4Link: "./images/okko/parts/part-4.svg",
+				segment5Link: "./images/okko/parts/part-5.svg",
+
+				videoVimeoId: "1099511491",
+				videoStorageLink:
+					"https://storage.yandexcloud.net/creo/okko/%D0%9C%D0%98%D0%A0%2C%20%D0%9A%D0%9E%D0%A2%D0%9E%D0%A0%D0%AB%D0%99%20%D0%AF%20%D0%A1%D0%9C%D0%9E%D0%A2%D0%A0%D0%AE%20_%20Okko.mp4",
+
 				popupText: 'ООО "OKKO интертеймент", ИНН 77999999999, ID a-99999',
 				logoLink: "https://okko.tv/",
 				landingLink: "https://okko.tv/",
@@ -25,45 +47,62 @@ export default class Needle {
 				question: "Нужен ли риелтор при покупке квартиры?",
 				answerLeft: "да, он может сэкономить время",
 				answerRight: "нет, справляюсь самостоятельно",
-				videoLink: "./vendor/video/samolet.mp4",
+				segment0Link: "./images/samolet/parts/part-0.svg",
+				segment1Link: "./images/samolet/parts/part-1.svg",
+				segment2Link: "./images/samolet/parts/part-2.svg",
+				segment3Link: "./images/samolet/parts/part-3.svg",
+				segment4Link: "./images/samolet/parts/part-4.svg",
+				segment5Link: "./images/samolet/parts/part-5.svg",
+
+				videoVimeoId: "1099511894",
+				videoStorageLink: "https://storage.yandexcloud.net/creo/Samolet/_%D0%9C%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%80.mp4",
+
 				popupText: 'ООО "САМОЛЕТ продакшен", ИНН 99999999999, ID a-11111',
 				logoLink: "https://samolet.ru/",
 				landingLink: "https://samolet.ru/flats/",
 			},
-
 			clickSound: "./vendor/audio/click.mp3",
 		};
 		this.options = Object.assign(defaultConfig, options);
 
-		this.creative = document.getElementById("creative");
+		this.creative = document.querySelector(elem);
 		this.createWidget();
-		
-		this.dial = document.querySelector("#dial");
-		this.needle = document.getElementById("needle");
-		
+
+		this.creative.style.userSelect = "none";
+
+		this.dial = this.creative.querySelector(".dial");
+		this.needle = this.creative.querySelector(".needle");
+
 		this.dragging = false;
 
-		this.createVideo();
-
-		this.videoPlayer = document.getElementById("videoPlayer");
-		this.videoContainer = document.getElementById("videoContainer");
-		this.videoContainer.style.display = "none";
+		this.videoContainer;
+		this.videoPlayer;
 
 		if (this.options.clickSound) {
 			this.clickSound = new Audio();
 			this.clickSound.src = this.options.clickSound;
 		}
 
-		this.createPopup();
-		this.infoBtn = document.getElementById("infoButton");
-		this.infoClose = document.getElementById("infoClose");
-		this.infoPopup = document.getElementById("infoPopup");
+		this.infoPopup;
+		this.infoClose;
+		this.infoBtn = this.creative.querySelector(".infoButton");
 
-		this.arcThumb = document.getElementById("arcThumb");
+		this.arrows = this.creative.querySelector(".creative-taxo_arrows");
+
+		this.touchpad = this.creative.querySelector(".creative-taxo_touchpad");
+
+		this.arcThumb = this.creative.querySelector(".arcThumb");
+		this.thumb = this.creative.querySelector("#thumbElement");
+		this.arcLabel = this.creative.querySelector(".arcLabel");
+		this.segments = this.creative.querySelector(".segments");
 
 		this.side = null;
-		this.prevDeltaX = 0;
 		this.canMove = true;
+		this.percent = 0;
+		this.prevDeltaX = 0;
+		this.angle;
+		this.touchMoved = false;
+
 		this.needle.classList.add("swingingLeft");
 
 		this.infoPopupListener();
@@ -71,17 +110,12 @@ export default class Needle {
 
 		this.optionsCorrector();
 
-		this.localStorage = [];		
+		this.viTimer;
+		this.txtTimer;
 	}
 
-	// Опционально
+	// Настройки
 	optionsCorrector() {
-		// Корректируем Стрелки
-		const arrows = document.querySelector(".creative-taxo_arrows");
-		if (!this.options.arrows) {
-			arrows.classList.add("hidden");
-		}
-
 		let opt = this.options;
 		let correctGraphics = (el) => {
 			if (opt.firm == "sber") {
@@ -93,19 +127,19 @@ export default class Needle {
 			}
 		};
 		// Корректируем Логотип
-		const logo = document.querySelector(".creative-logo_link");
+		const logo = this.creative.querySelector(".creative-logo_link");
 		correctGraphics(logo);
 		// Корректируем Бегунок
-		const thumb = document.getElementById("arcThumb");
+		const thumb = this.creative.querySelector(".arcThumb");
 		correctGraphics(thumb);
 		// Корректируем Ярлычек
-		const lab = document.getElementById("arcLabel");
+		const lab = this.creative.querySelector(".arcLabel");
 		correctGraphics(lab);
 
 		// Корректируем ВОПРОС и ОТВЕТЫ
-		const question = document.querySelector(".creative-header_question p");
-		const answerLeft = document.querySelector(".creative-answers_left p");
-		const answerRight = document.querySelector(".creative-answers_right p");
+		const question = this.creative.querySelector(".creative-header_question p");
+		const answerLeft = this.creative.querySelector(".creative-answers_left p");
+		const answerRight = this.creative.querySelector(".creative-answers_right p");
 		if (this.options.firm == "sber") {
 			question.textContent = this.options.sber.question;
 			answerLeft.textContent = this.options.sber.answerLeft;
@@ -119,109 +153,133 @@ export default class Needle {
 			answerLeft.textContent = this.options.samolet.answerLeft;
 			answerRight.textContent = this.options.samolet.answerRight;
 		}
+
+		if (this.options.aspect == "16/9") {
+			this.creative.classList.add("aspect169");
+		}
+		if (this.options.aspect == "4/3") {
+			this.creative.classList.add("aspect43");
+		}
 	}
 
 	// Прослушивание РЕКЛАМА
 	infoPopupListener() {
 		this.infoBtn.addEventListener("click", (e) => {
-			this.infoPopup.classList.add("show");
-			this.canMove = false;
+			this.openPopup();
 		});
+	}
+
+	openPopup() {
+		this.createPopup();
+		this.infoPopup = document.getElementById("infoPopup");
+		this.infoClose = this.infoPopup.querySelector(".infoClose");
+		this.infoPopup.classList.add("show");
 
 		this.infoClose.addEventListener("click", (e) => {
 			this.infoPopup.classList.remove("show");
-			this.canMove = true;
+			this.removePopup();
 		});
+	}
+
+	removePopup() {
+		this.infoPopup && this.infoPopup.remove();
 	}
 
 	// Прослушивание событий
 	listener() {
-		this.needle.addEventListener(
+		this.thumb.addEventListener(
 			"touchstart",
 			(e) => {
 				this.dragging = true;
-				this.animeStart();
-				// e.preventDefault();
 			},
 			{ passive: false }
 		);
 
-		this.needle.addEventListener(
+		this.thumb.addEventListener(
 			"touchmove",
 			(e) => {
 				if (!this.dragging) return;
 				// берем первый палец
 				const touch = e.touches[0];
-				if (this.dragging && this.canMove) this.rotateNeedle(touch);
+				if (this.dragging && this.canMove) {
+					this.rotatePin(touch);
+					this.touchMoved = true;
+				}
 				e.preventDefault();
 			},
 			{ passive: false }
 		);
 
-		this.needle.addEventListener("touchend", (e) => {
+		this.thumb.addEventListener("touchend", (e) => {
+			if (this.canMove && this.dragging && this.touchMoved) {
+				this.clickSound ? this.clickSound.play() : "";
+				this.animeStart();
+
+				setTimeout(() => {
+					this.animeEnd();
+				}, 0);
+			}
 			this.dragging = false;
-			if (this.canMove) {
-				this.animeEnd();
+		});
+
+		window.addEventListener("mouseup", (event) => {
+			if (event.target != this.arcLabel) {
+				if (this.canMove && this.dragging) {
+					this.clickSound ? this.clickSound.play() : "";
+					this.animeStart();
+
+					setTimeout(() => {
+						this.animeEnd();
+					}, 0);
+				}
+				this.dragging = false;
 			}
 		});
 
-		this.needle.addEventListener("mousedown", (event) => {
-			this.dragging = true;
-			this.animeStart();
-			this.rotateNeedle(event);
+		window.addEventListener("mousemove", (event) => {
+			if (event.target != this.arcLabel) {
+				if (this.dragging && this.canMove) {
+					this.rotatePin(event);
+				}
+			}
 		});
 
-		this.dial.addEventListener("mousemove", (event) => {
-			if (this.dragging && this.canMove) this.rotateNeedle(event);
-		});
-
-		this.dial.addEventListener("mouseup", () => {
-			this.dragging = false;
-			if (this.canMove) {
-				this.animeEnd();
+		this.thumb.addEventListener("mousedown", (event) => {
+			if (event.target != this.arcLabel) {
+				this.dragging = true;
 			}
 		});
 
 		this.dial.addEventListener("click", (event) => {
-			if (this.canMove) {
-				this.needle.classList.remove("swingingLeft");
-				this.needle.classList.remove("swingingRight");
+			if (event.target != this.arcLabel) {
+				if (this.canMove) {
+					this.clickSound ? this.clickSound.play() : "";
+					this.animeStart();
+					this.rotatePin(event);
 
-				const value = this.getValueFromMouseEvent(event);
-				this.updatevalue(value);
-			}
-		});
-
-		// Когда видео заканчивается, скрываем контейнер
-		this.videoPlayer.addEventListener("ended", () => {
-			this.videoContainer.style.display = "none"; // Скрываем контейнер
-			this.canMove = true;
-		});
-		// Опционально: скрываем контейнер, если пользователь кликнет вне видео
-		this.videoContainer.addEventListener("click", (event) => {
-			if (event.target === this.videoContainer) {
-				this.videoPlayer.pause(); // Приостанавливаем видео
-				this.videoPlayer.currentTime = 0; // Сбрасываем видео на начало
-				this.videoContainer.style.display = "none";
-				this.canMove = true;
+					setTimeout(() => {
+						this.animeEnd();
+					}, 0);
+				}
 			}
 		});
 	}
 	// Начало энерционной анимации
 	animeStart() {
 		if (this.canMove) {
-			this.dial.style.userSelect = "none";
-
 			this.needle.classList.remove("swingingLeft");
 			this.needle.classList.remove("swingingRight");
-			this.needle.classList.remove("forwardLeft");
-			this.needle.classList.remove("forwardRight");
 		}
 	}
 	// Конец энерционной анимации
 	animeEnd() {
+		this.rotateNeedle(this.angle);
 		if (this.canMove) {
-			this.dial.style.userSelect = "";
+			this.arcThumb.classList.add("hide");
+
+			this.segments.classList.add("show");
+
+			this.arrows.classList.add("hide");
 
 			setTimeout(() => {
 				if (this.side == "left") {
@@ -231,24 +289,89 @@ export default class Needle {
 					this.needle.classList.add("forwardRight");
 				}
 				this.canMove = false;
-			}, 100);
+
+				this.showPercentText(this.percent);
+			}, 250);
 
 			setTimeout(() => {
 				this.needle.classList.remove("forwardLeft");
 				this.needle.classList.remove("forwardRight");
-
-				if (this.side == "right") {
-					this.needle.classList.add("swingingRight");
-				}
-				if (this.side == "left") {
-					this.needle.classList.add("swingingLeft");
-				}
-				// this.canMove = true;
-			}, 1100);
+			}, 1250);
 		}
-		this.openVideo();
+		clearTimeout(this.viTimer);
+		this.viTimer = setTimeout(() => {
+			this.openVideo();
+		}, 2000);
 	}
 
+	// Показываем нужный сегмент
+	updateSegment(angle) {
+		const seg0 = this.creative.querySelector(".segment-0");
+		const seg1 = this.creative.querySelector(".segment-1");
+		const seg2 = this.creative.querySelector(".segment-2");
+		const seg3 = this.creative.querySelector(".segment-3");
+		const seg4 = this.creative.querySelector(".segment-4");
+		const seg5 = this.creative.querySelector(".segment-5");
+		const all = [seg0, seg1, seg2, seg3, seg4, seg5];
+
+		function hideOther(segment) {
+			all.forEach((s) => {
+				if (s !== segment) {
+					s.classList.add("hidden");
+				}
+				segment.classList.remove("hidden");
+			});
+		}
+		if (angle > 144 && angle <= 180) {
+			hideOther(seg1);
+			this.percent = 2;
+		}
+		if (angle > 111 && angle <= 144) {
+			hideOther(seg2);
+			this.percent = 70;
+		}
+		if (angle > 69 && angle <= 111) {
+			hideOther(seg3);
+			this.percent = 6;
+		}
+		if (angle > 36 && angle <= 69) {
+			hideOther(seg4);
+			this.percent = 10;
+		}
+		if (angle > 0 && angle <= 36) {
+			hideOther(seg5);
+			this.percent = 12;
+		}
+		if (angle == "undefined") {
+			hideOther(seg0);
+			this.percent = 0;
+		}
+	}
+
+	// Показываем выбранные проценты в тексте
+	showPercentText(percent) {
+		if (percent != 0) {
+			const text = this.creative.querySelector(".creative-header_question p");
+			let percentClass;
+
+			if (this.options.firm == "sber") {
+				percentClass = "sber-percent";
+			}
+			if (this.options.firm == "okko") {
+				percentClass = "okko-percent";
+			}
+			if (this.options.firm == "samolet") {
+				percentClass = "samolet-percent";
+			}
+
+			clearTimeout(this.txtTimer);
+			text.classList.add("hide-show");
+			this.txtTimer = setTimeout(() => {
+				text.classList.remove("hide-show");
+			}, 750);
+			text.innerHTML = `<span class="${percentClass}">${percent}%</span> пользователей думают также`;
+		}
+	}
 	// Получаем угол при перетаскивании пина
 	getAngleFromEvent(event, elem) {
 		const rect = elem.getBoundingClientRect();
@@ -265,91 +388,233 @@ export default class Needle {
 		let angleDeg = angleRad * (180 / Math.PI);
 		angleDeg = Math.max(12, Math.min(168, angleDeg));
 
-		return angleDeg;
-	}
-	// Получаем угол пина при клике
-	getValueFromMouseEvent(event) {
-		const rect = this.dial.getBoundingClientRect();
-		const centerX = rect.left + rect.width / 2;
-		const centerY = rect.bottom;
-		const deltaX = event.clientX - centerX;
-		const deltaY = event.clientY - centerY;
-		let angleRad = Math.atan2(-deltaY, deltaX); // Используем -deltaY, так как Y-ось в браузере инвертирована
-		let angleDeg = angleRad * (180 / Math.PI);
+		if (dx < 0) {
+			if (dx < this.prevDeltaX) {
+				this.side = "left";
+				this.prevDeltaX = dx;
+			} else if (dx > this.prevDeltaX) {
+				this.side = "right";
+				this.prevDeltaX = dx;
+			}
+		}
+		if (dx > 0) {
+			if (dx > this.prevDeltaX) {
+				this.side = "right";
+				this.prevDeltaX = dx;
+			} else if (dx < this.prevDeltaX) {
+				this.side = "left";
+				this.prevDeltaX = dx;
+			}
+		}
 
-		if (deltaX < 0) {
-			if (deltaX < this.prevDeltaX) {
-				this.side = "left";
-				this.prevDeltaX = deltaX;
-			} else {
-				this.side = "right";
-				this.prevDeltaX = deltaX;
-			}
-		}
-		if (deltaX > 0) {
-			if (deltaX > this.prevDeltaX) {
-				this.side = "right";
-				this.prevDeltaX = deltaX;
-			} else {
-				this.side = "left";
-				this.prevDeltaX = deltaX;
-			}
-		}
-		this.createStorageSimple();
 		return angleDeg;
 	}
 
-	// Вращаем пин при перетаскивании
-	rotateNeedle(event) {
-		const angle = this.getAngleFromEvent(event, dial);
+	// Вращаем уазатель
+	rotateNeedle(angle) {
+		angle = Math.max(0, Math.min(180, angle));
+		if (angle < 12) {
+			angle = 12;
+		}
+		if (angle > 168) {
+			angle = 168;
+		}
 		const rotation = angle - 90;
-		this.needle.style.setProperty("--base-angle", `${-rotation * 1.14}deg`);
-		this.arcThumb.style.setProperty("--thumb-angle", `${-rotation * 1.1}deg`);
+		this.needle.style.setProperty("--base-angle", `${-rotation}deg`);
+		this.updateSegment(angle);
 	}
 
-	// Вращаем пин при клике
-	updatevalue(value) {
-		value = Math.max(0, Math.min(180, value));
-		if (value < 12) {
-			value = 12;
-		}
-		if (value > 168) {
-			value = 168;
-		}
-		const rotation = value - 90;
-		this.needle.style.setProperty("--base-angle", `${-rotation * 1.14}deg`);
+	// Вращаем бегунок
+	rotatePin(event) {
+		const angle = this.getAngleFromEvent(event, this.dial);
+		const rotation = angle - 90;
 		this.arcThumb.style.setProperty("--thumb-angle", `${-rotation * 1.1}deg`);
+		this.angle = angle;
 	}
 
-	// Открытие видео
 	openVideo() {
-		this.clickSound ? this.clickSound.play() : "";
-
-		setTimeout(() => {
-			this.videoContainer.style.display = "flex"; // Показываем контейнер
-			this.videoPlayer.play(); // Запускаем видео
-			this.infoPopup.classList.remove("show");
-		}, 2000);
+		if (this.options.videoSource == "vimeo") {
+			this.openVimeoVideo();
+		} else if (this.options.videoSource == "storage") {
+			this.openBrowserVideo();
+		}
 	}
 
-	// Создаем контейнер для видео
-	createVideo() {
+	// Открытие видео в HTML5
+	openBrowserVideo() {
+		this.createBrowserVideo();
+		this.videoContainer = document.getElementById("videoContainer");
+		this.browserPlayer = this.videoContainer.querySelector("#browser-player");
+		this.videoCloseButton = this.videoContainer.querySelector(".videoCloseButton");
+
+		this.videoCloseButton.addEventListener("click", (e) => {
+			this.removeVideo();
+		});
+
+		let closeVideoDelay = this.options.closeVideoDelayButtonShow;
+		let videoCloseButton = this.videoCloseButton;
+
+		const video = this.browserPlayer;
+
+		video && video.play();
+
+		// Событие окончания воспроизведения
+		video.addEventListener("ended", function () {
+			console.log("Видео закончилось!");
+			let ct = document.querySelector("#videoContainer");
+			ct && ct.remove();
+		});
+
+		let hasActionFired = false;
+		// Флаг, чтобы действие выполнялось один раз
+		video.addEventListener("timeupdate", function () {
+			if (!hasActionFired && video.currentTime >= closeVideoDelay / 1000) {
+				videoCloseButton.classList.add("show");
+				console.log("Прошла задержка");
+				hasActionFired = true;
+				// Сработало один раз
+			}
+		});
+		// Сброс флага при перемотке назад (например, пользователь возвращается к началу)
+		video.addEventListener("seeked", function () {
+			if (video.currentTime < closeVideoDelay / 1000) {
+				hasActionFired = false;
+			}
+		});
+	}
+
+	// Открытие видео в Vimmeo
+	openVimeoVideo() {
+		this.createVimeoVideo();
+		this.videoContainer = document.getElementById("videoContainer");
+		this.vimeoPlayer = this.videoContainer.querySelector("#vimeo-player");
+		this.videoCloseButton = this.videoContainer.querySelector(".videoCloseButton");
+
+		this.videoCloseButton.addEventListener("click", (e) => {
+			this.removeVideo();
+		});
+
+		const player = new Vimeo.Player(this.vimeoPlayer);
+
+		let closeVideoDelay = this.options.closeVideoDelayButtonShow;
+		let videoCloseButton = this.videoCloseButton;
+		player.on("play", function () {
+			console.log("Кнопка закрыть появиться через ", closeVideoDelay, " м/с");
+			setTimeout(() => {
+				videoCloseButton.classList.add("show");
+			}, closeVideoDelay);
+		});
+
+		// Пример: Слушаем событие "ended" (окончание видео)
+		player.on("ended", function () {
+			console.log("Видео на Vimeo закончилось!");
+			let ct = document.querySelector("#videoContainer");
+			ct && ct.remove();
+		});
+
+		player
+			.setVolume(0.5)
+			.then(function (volume) {
+				// громкость установлена на 0.5
+			})
+			.catch(function (error) {
+				switch (error.name) {
+					case "RangeError":
+						// значение громкости вне диапазона от 0 до 1
+						break;
+					default:
+						// какая-то другая ошибка
+						break;
+				}
+			});
+	}
+
+	// Создаем контейнер для Vimeo видео
+	createVimeoVideo() {
+		let videoId, landingLink;
 		if (this.options.firm == "sber") {
-			this.videoLink = this.options.sber.videoLink;
+			videoId = this.options.sber.videoVimeoId;
+			landingLink = this.options.sber.landingLink;
 		} else if (this.options.firm == "okko") {
-			this.videoLink = this.options.okko.videoLink;
+			videoId = this.options.okko.videoVimeoId;
+			landingLink = this.options.okko.landingLink;
 		} else if (this.options.firm == "samolet") {
-			this.videoLink = this.options.samolet.videoLink;
+			videoId = this.options.samolet.videoVimeoId;
+			landingLink = this.options.samolet.landingLink;
 		}
 		let html = `
-		<div id="videoContainer">
-			<video id="videoPlayer" controls>
-				<source src="${this.videoLink}" type="video/mp4" />
-				Ваш браузер не поддерживает видео HTML5.
-			</video>
+		<div id="videoContainer">	
+			<iframe class="videoPlayerClass"
+  			  id="vimeo-player"
+    			src="https://player.vimeo.com/video/${videoId}?title=0&background=1&byline=0&portrait=0&autoplay=1"    		
+    			frameborder="0"
+    			allow="autoplay; fullscreen; picture-in-picture"
+    			allowfullscreen				
+			>			
+			</iframe>
+		<a href="${landingLink}" target="_blank" class="linkLayer">
+		</a>					
+		
+			<button class="videoCloseButton">
+					<svg fill="#000000" width="64px" height="64px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+						<g id="SVGRepo_bgCarrier" stroke-width="0"/>
+						<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+						<g id="SVGRepo_iconCarrier"> <path d="M18.8,16l5.5-5.5c0.8-0.8,0.8-2,0-2.8l0,0C24,7.3,23.5,7,23,7c-0.5,0-1,0.2-1.4,0.6L16,13.2l-5.5-5.5 c-0.8-0.8-2.1-0.8-2.8,0C7.3,8,7,8.5,7,9.1s0.2,1,0.6,1.4l5.5,5.5l-5.5,5.5C7.3,21.9,7,22.4,7,23c0,0.5,0.2,1,0.6,1.4 C8,24.8,8.5,25,9,25c0.5,0,1-0.2,1.4-0.6l5.5-5.5l5.5,5.5c0.8,0.8,2.1,0.8,2.8,0c0.8-0.8,0.8-2.1,0-2.8L18.8,16z"/> </g>
+					</svg>
+			</button>			
 		</div>`;
 
-		document.body.insertAdjacentHTML("beforeend", html);
+		const video = document.querySelector("#videoContainer");
+		if (!video) {
+			const placement = this.creative.querySelector(".creative-tile");
+			placement.insertAdjacentHTML("beforeend", html);
+		}
+	}
+
+	// Создаем контейнер для HTML5 видео
+	createBrowserVideo() {
+		let videoLink, landingLink;
+		if (this.options.firm == "sber") {
+			videoLink = this.options.sber.videoStorageLink;
+			landingLink = this.options.sber.landingLink;
+		} else if (this.options.firm == "okko") {
+			videoLink = this.options.okko.videoStorageLink;
+			landingLink = this.options.okko.landingLink;
+		} else if (this.options.firm == "samolet") {
+			videoLink = this.options.samolet.videoStorageLink;
+			landingLink = this.options.samolet.landingLink;
+		}
+		let html = `
+		<div id="videoContainer">	
+		
+		<video class="videoPlayerClass" id="browser-player" autoplay playsinline preload="auto" controls>
+  			<source 
+				src="${videoLink}" 				
+				type="video/mp4"
+			> 
+   			Ваш браузер не поддерживает тег video.
+   		</video>
+
+		<a href="${landingLink}" target="_blank" class="linkLayer">
+		</a>					
+		
+			<button class="videoCloseButton">
+					<svg fill="#000000" width="64px" height="64px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+						<g id="SVGRepo_bgCarrier" stroke-width="0"/>
+						<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+						<g id="SVGRepo_iconCarrier"> <path d="M18.8,16l5.5-5.5c0.8-0.8,0.8-2,0-2.8l0,0C24,7.3,23.5,7,23,7c-0.5,0-1,0.2-1.4,0.6L16,13.2l-5.5-5.5 c-0.8-0.8-2.1-0.8-2.8,0C7.3,8,7,8.5,7,9.1s0.2,1,0.6,1.4l5.5,5.5l-5.5,5.5C7.3,21.9,7,22.4,7,23c0,0.5,0.2,1,0.6,1.4 C8,24.8,8.5,25,9,25c0.5,0,1-0.2,1.4-0.6l5.5-5.5l5.5,5.5c0.8,0.8,2.1,0.8,2.8,0c0.8-0.8,0.8-2.1,0-2.8L18.8,16z"/> </g>
+					</svg>
+			</button>			
+		</div>`;
+
+		const video = document.querySelector("#videoContainer");
+		if (!video) {
+			const placement = this.creative.querySelector(".creative-tile");
+			placement.insertAdjacentHTML("beforeend", html);
+		}
+	}
+	removeVideo() {
+		this.videoContainer && this.videoContainer.remove();
 	}
 
 	// Создаем информационный контейнер
@@ -364,7 +629,7 @@ export default class Needle {
 		let html = `
 		<div class="info-popup" id="infoPopup">
 			<div class="info-popup_inner">
-				<button class="info-popup_close" id="infoClose">
+				<button class="info-popup_close infoClose">
 					<svg fill="#000000" width="64px" height="64px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
 						<g id="SVGRepo_bgCarrier" stroke-width="0"/>
 						<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
@@ -378,20 +643,48 @@ export default class Needle {
 		</div>
 		`;
 
-		document.body.insertAdjacentHTML("beforeend", html);
+		const pop = document.querySelector("#infoPopup");
+		if (!pop) {
+			document.body.insertAdjacentHTML("beforeend", html);
+		}
 	}
 
 	createWidget() {
-		let logoLink;
+		let logoLink, landingLink;
+		let segment0Link, segment1Link, segment2Link, segment3Link, segment4Link, segment5Link;
+
 		if (this.options.firm == "sber") {
 			logoLink = this.options.sber.logoLink;
+			landingLink = this.options.sber.landingLink;
+			segment0Link = this.options.sber.segment0Link;
+			segment1Link = this.options.sber.segment1Link;
+			segment2Link = this.options.sber.segment2Link;
+			segment3Link = this.options.sber.segment3Link;
+			segment4Link = this.options.sber.segment4Link;
+			segment5Link = this.options.sber.segment5Link;
 		} else if (this.options.firm == "okko") {
 			logoLink = this.options.okko.logoLink;
+			landingLink = this.options.okko.landingLink;
+			segment0Link = this.options.okko.segment0Link;
+			segment1Link = this.options.okko.segment1Link;
+			segment2Link = this.options.okko.segment2Link;
+			segment3Link = this.options.okko.segment3Link;
+			segment4Link = this.options.okko.segment4Link;
+			segment5Link = this.options.okko.segment5Link;
 		} else if (this.options.firm == "samolet") {
 			logoLink = this.options.samolet.logoLink;
-		}		
+			landingLink = this.options.samolet.landingLink;
+			segment0Link = this.options.samolet.segment0Link;
+			segment1Link = this.options.samolet.segment1Link;
+			segment2Link = this.options.samolet.segment2Link;
+			segment3Link = this.options.samolet.segment3Link;
+			segment4Link = this.options.samolet.segment4Link;
+			segment5Link = this.options.samolet.segment5Link;
+		}
 		let html = `
+		<div class="creative-tile">
 			<!-- Информационный текст -->
+        <div class="creative-header-out">
 		<div class="creative-header">
 			<div class="creative-header_pulse"><span>Живое голосование</span><span class="pulse-icon"></span></div>
 
@@ -399,15 +692,44 @@ export default class Needle {
 				<p></p>
 			</div>
 		</div>
+		</div>
 
+		<div class='flex-box'>
 		<!-- Тахометр -->
 		<div class="creative-taxo">
-			<div class="creative-taxo_arc" id="dial">
+			<div class="creative-taxo_arc dial">			   
+				<div class="creative-taxo_circle"></div>	
+				<div class="creative-taxo_touchpad"></div>
 				<div class="creative-taxo_arrows"></div>
-				<div class="creative-taxo_needle" id="needle"></div>
-				<div class="creative-taxo_label" id="arcLabel"></div>
-				<div class="creative-taxo_circle"></div>
-				<div class="creative-taxo_thumb" id="arcThumb"></div>
+				<div class="creative-taxo_needle needle"></div>
+				<a href="${landingLink}" target="_blank" class="creative-taxo_label arcLabel"></a>
+														
+				<div class="creative-taxo_segments segments">
+					<div class="creative-taxo_segment segment-0">
+						<img class="img-responsive" src="${segment0Link}" alt="0%"/>
+					</div>
+					<div class="creative-taxo_segment segment-1">
+						<img class="img-responsive" src="${segment1Link}" alt="2%"/>
+					</div>
+					<div class="creative-taxo_segment segment-2">
+						<img class="img-responsive" src="${segment2Link}" alt="70%"/>
+					</div>
+					<div class="creative-taxo_segment segment-3">
+						<img class="img-responsive" src="${segment3Link}" alt="6%"/>
+					</div>
+					<div class="creative-taxo_segment segment-4">
+						<img class="img-responsive" src="${segment4Link}" alt="10%"/>
+					</div>
+					<div class="creative-taxo_segment segment-5">
+						<img class="img-responsive" src="${segment5Link}" alt="12%"/>
+					</div>
+				</div>
+               
+				<div class="creative-taxo_thumb-parent">
+				<div class="creative-taxo_thumb arcThumb">
+				    <span class="creative-taxo_thumb-element" id="thumbElement"></span>
+				</div>	
+				</div>
 			</div>
 		</div>
 
@@ -421,31 +743,36 @@ export default class Needle {
 			</div>
 		</div>
 
+		<div>
 		<!-- Лого -->
 		<div class="creative-logo">
-			<a href="${logoLink}" class="creative-logo_link"></a>
+			<a target="_blank" href="${logoLink}" class="creative-logo_link"></a>
 		</div>
 
 		<!-- Подвал -->
 		<div class="creative-footer">			
 		
-			<a href="https://programmatica.com/" class="creative-footer_programmatica">
+			<a target="_blank" href="https://programmatica.com/" class="creative-footer_programmatica">
 				<img class="img-responsive" src="./images/programmatica.svg" alt="Логотип programmatica">
 			</a>
-			<button id="infoButton" class="creative-footer_advertising">
+			<button class="creative-footer_advertising infoButton">
 				<span class="btn-info">!</span>
 				<span>Реклама</span>
 			</button>
-		</div>`;		
-		
+		</div>
+		</div>
+		</div>
+		</div>`;
+
 		this.creative.insertAdjacentHTML("beforeend", html);
 	}
 
-	// Функция формирования базы голосов для двух вариантов (можно будет переписать под свои нужды)
-	createStorageSimple() {
-		const left = document.querySelector(".creative-answers_left p").textContent.trim();
-		const right = document.querySelector(".creative-answers_right p").textContent.trim();
-		this.localStorage.push(this.side == "left" ? left : right);
-		console.log("Массив ответов :", this.localStorage);
+	// Записываем ГОЛОС в LocalStorage
+	createStorage() {
+		const left = this.creative.querySelector(".creative-answers_left p").textContent.trim();
+		const right = this.creative.querySelector(".creative-answers_right p").textContent.trim();
+
+		localStorage.setItem("voice", this.side == "left" ? left : right);
+		console.log(localStorage.getItem("voice"), ' - сохранёно в LocalStorage по ключу "voice" !');
 	}
 }

@@ -31,16 +31,19 @@ const handleJS = javascript.bind(null, !isBuild, browserSyncInstance);
 const handleImages = images.bind(null, isBuild, browserSyncInstance);
 const handleSvg = svg.bind(null, isBuild, browserSyncInstance);
 
+const handlePostcss = css.bind(null, !isBuild, browserSyncInstance);
 /**
  * Наблюдатель за изменениями в файлах
  */
-function watcher() {
+function watcher() {  
   gulp.watch(filePaths.watch.static, copy);
   gulp.watch(filePaths.watch.html, handleHTML);
   gulp.watch(filePaths.watch.scss, handleSCSS);
   gulp.watch(filePaths.watch.js, handleJS);
   gulp.watch(filePaths.watch.images, handleImages);
   gulp.watch(filePaths.watch.svg, handleSvg);
+
+  gulp.watch(filePaths.watch.scss, handlePostcss);
 }
 
 /**

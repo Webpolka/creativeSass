@@ -684,61 +684,6 @@ sup {
 }
 
 /*-----------------------------------------------------------------------------------------------------------------------------
- Ненужные классы (для примера)
-------------------------------------------------------------------------------------------------------------------------------*/
-.example-container {
-  padding: 50px;
-  margin-inline: auto;
-  max-width: 1920px;
-}
-@media (max-width: 768px) {
-  .example-container {
-    padding: 20px;
-  }
-}
-
-.example-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 50px;
-  margin-bottom: 50px;
-}
-.example-row:last-child {
-  margin-bottom: 0;
-}
-@media (max-width: 768px) {
-  .example-row {
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 20px;
-  }
-}
-.example-row #creative-sber {
-  width: 100%;
-}
-@media (max-width: 768px) {
-  .example-row #creative-sber {
-    width: 100%;
-  }
-}
-.example-row #creative-okko {
-  width: 100%;
-}
-@media (max-width: 768px) {
-  .example-row #creative-okko {
-    width: 100%;
-  }
-}
-.example-row #creative-samolet {
-  width: 100%;
-}
-@media (max-width: 768px) {
-  .example-row #creative-samolet {
-    width: 100%;
-  }
-}
-
-/*-----------------------------------------------------------------------------------------------------------------------------
 ПОПАП для информации
 ------------------------------------------------------------------------------------------------------------------------------*/
 .info-popup {
@@ -847,7 +792,7 @@ sup {
   z-index: 2;
 }
 
-#vimeo-player {
+.videoPlayerClass {
   position: absolute;
   top: 0;
   left: 0;
