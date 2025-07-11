@@ -261,6 +261,7 @@ sup {
 
 .creative {
   margin-inline: auto;
+  position: relative;
   min-width: 280px;
   /* Информационный текст */
   /* Сам элемент */
@@ -362,11 +363,10 @@ sup {
   font-size: clamp(12px, 2.2cqw, 25px);
 }
 .creative-tile {
-  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: #ffffff;
+  background-color: #fff;
   container-type: inline-size;
   overflow: hidden;
 }
@@ -440,6 +440,10 @@ sup {
   animation: hideShow 1s ease-in-out forwards;
 }
 .creative-taxo {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
   margin-top: clamp(5px, 1cqw, 75px);
 }
 .creative-taxo_arc {
@@ -458,7 +462,7 @@ sup {
   bottom: 8%;
   left: 50%;
   cursor: pointer;
-  z-index: 5;
+  z-index: 4;
   transform-origin: bottom center;
   width: 3.4%;
   height: auto;
@@ -489,7 +493,7 @@ sup {
   position: absolute;
   bottom: 0;
   left: 50%;
-  z-index: 10;
+  z-index: 4;
   transform: translate(-50%, 50%);
   width: 14.3%;
   height: auto;
@@ -582,7 +586,6 @@ sup {
 }
 .creative-taxo_segments {
   user-select: none;
-  aspect-ratio: 95/84;
   width: 89%;
   position: absolute;
   top: -7%;
@@ -605,7 +608,7 @@ sup {
   font-size: clamp(10px, 4cqw, 40px);
   line-height: 90%;
   color: #000;
-  width: 35%;
+  width: 40%;
 }
 .creative-answers_left {
   text-align: left;
@@ -617,7 +620,7 @@ sup {
   display: flex;
   justify-content: flex-end;
   position: relative;
-  z-index: 110;
+  z-index: 9999;
   margin-bottom: clamp(5px, 1.5cqw, 50px);
 }
 .creative-logo_link {
@@ -788,15 +791,17 @@ sup {
 /*-----------------------------------------------------------------------------------------------------------------------------
 Лайтбокс для видео 
 ------------------------------------------------------------------------------------------------------------------------------*/
-#videoContainer {
+.videoContainer {
+  display: none;
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.8);
-  z-index: 100;
+}
+.videoContainer.show {
+  display: block;
 }
 
 .linkLayer {
@@ -805,7 +810,17 @@ sup {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  z-index: 10;
+}
+
+.blacklay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .videoPlayerClass {
@@ -815,7 +830,7 @@ sup {
   width: 100%;
   height: 100%;
   border: 0;
-  z-index: 1;
+  z-index: 8;
 }
 
 .videoCloseButton {

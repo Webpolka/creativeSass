@@ -16,6 +16,7 @@ class Needle {
 				segment4Link: "./images/sber/parts/part-4.svg",
 				segment5Link: "./images/sber/parts/part-5.svg",
 
+				videoStoragePoster: "./images/sber/sber-banner.png",
 				videoStorageLink: "https://storage.yandexcloud.net/creo/Sber/sber%20auto.mp4",
 
 				popupText: 'ООО "CБЕР маркет", ИНН 0000000000, ID a-000000',
@@ -33,6 +34,7 @@ class Needle {
 				segment4Link: "./images/okko/parts/part-4.svg",
 				segment5Link: "./images/okko/parts/part-5.svg",
 
+				videoStoragePoster: "./images/sber/sber-banner.png",
 				videoStorageLink:
 					"https://storage.yandexcloud.net/creo/okko/%D0%9C%D0%98%D0%A0%2C%20%D0%9A%D0%9E%D0%A2%D0%9E%D0%A0%D0%AB%D0%99%20%D0%AF%20%D0%A1%D0%9C%D0%9E%D0%A2%D0%A0%D0%AE%20_%20Okko.mp4",
 
@@ -51,6 +53,7 @@ class Needle {
 				segment4Link: "./images/samolet/parts/part-4.svg",
 				segment5Link: "./images/samolet/parts/part-5.svg",
 
+				videoStoragePoster: "./images/sber/sber-banner.png",
 				videoStorageLink: "https://storage.yandexcloud.net/creo/Samolet/_%D0%9C%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%80.mp4",
 
 				popupText: 'ООО "САМОЛЕТ продакшен", ИНН 99999999999, ID a-11111',
@@ -218,7 +221,6 @@ class Needle {
 		eles.forEach((ele) => {
 			ele.style.setProperty(styling, value + "px");
 		});
-		
 	}
 
 	// Настройки
@@ -557,9 +559,18 @@ class Needle {
 		let closeVideoDelay = this.options.closeVideoDelayButtonShow;
 		let videoCloseButton = this.videoCloseButton;
 
+		var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
 		const video = this.browserPlayer;
 
-		video && video.play();
+		if (!isSafari) {
+			video.muted = false;
+			console.log('NO SAFARI');			
+		}
+		
+		if(isSafari){
+			console.log('IS SAFARI');
+		}
 
 		// Событие окончания воспроизведения
 		video.addEventListener("ended", function () {
@@ -588,21 +599,33 @@ class Needle {
 
 	// Создаем контейнер для HTML5 видео
 	createBrowserVideo() {
-		let videoLink, landingLink;
+		let videoLink, landingLink, videoPoster;
 		if (this.options.firm == "sber") {
 			videoLink = this.options.sber.videoStorageLink;
 			landingLink = this.options.sber.landingLink;
+			videoPoster = this.options.sber.videoStoragePoster;
 		} else if (this.options.firm == "okko") {
 			videoLink = this.options.okko.videoStorageLink;
 			landingLink = this.options.okko.landingLink;
+			videoPoster = this.options.okko.videoStoragePoster;
 		} else if (this.options.firm == "samolet") {
 			videoLink = this.options.samolet.videoStorageLink;
 			landingLink = this.options.samolet.landingLink;
+			videoPoster = this.options.samolet.videoStoragePoster;
 		}
 		let html = `
 		<div id="videoContainer">	
 		
-		<video class="videoPlayerClass" id="browser-player" autoplay playsinline preload="auto" controls>
+		<video 
+		class="videoPlayerClass" 
+		id="browser-player" 
+		muted 
+		autoplay 
+		playsinline 
+		preload="auto" 
+		poster="${videoPoster}" 
+		controls
+		>
   			<source 
 				src="${videoLink}" 				
 				type="video/mp4"
@@ -610,8 +633,8 @@ class Needle {
    			Ваш браузер не поддерживает тег video.
    		</video>
 
-		<a href="${landingLink}" target="_blank" class="linkLayer">
-		</a>					
+		<a href="${landingLink}" target="_blank" class="linkLayer"></a>					
+		<div class="blacklay"></div>
 		
 			<button class="videoCloseButton">
 					<svg fill="#000000" width="64px" height="64px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -791,3 +814,27 @@ class Needle {
 		console.log(localStorage.getItem("voice"), ' - сохранёно в LocalStorage по ключу "voice" !');
 	}
 }
+/*-----------------------------------------------------------------------------------------------------------
+Инициализация
+-------------------------------------------------------------------------------------------------------------*/
+document.addEventListener("DOMContentLoaded", function () {
+	const crSber = document.querySelector("#creative-sber");
+	const crOkko = document.querySelector("#creative-okko");
+	const crSamo = document.querySelector("#creative-samolet");
+
+	crSber &&
+		new Needle("#creative-sber", {
+			firm: "sber",
+			aspect: "4/3",
+		});
+	crSamo &&
+		new Needle("#creative-samolet", {
+			firm: "samolet",
+			aspect: "4/3",
+		});
+	crOkko &&
+		new Needle("#creative-okko", {
+			firm: "okko",
+			aspect: "4/3",
+		});
+});

@@ -9,6 +9,7 @@
 
 .creative {
 	margin-inline: auto;
+	position: relative;
 
 	&.aspect169 {
 		max-width: 1920px;
@@ -122,14 +123,13 @@
 	.flex-end {
 	}
 
-	&-tile {
-		position: relative;
+	&-tile {		
 
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
 
-		background-color: #ffffff;
+		background-color: #fff;   
 
 		container-type: inline-size;
 		overflow: hidden;
@@ -223,6 +223,12 @@
 
 	/* Сам элемент */
 	&-taxo {
+		
+		position: relative;
+		top: 0;
+		left: 0;
+		width: 100%;
+
 		margin-top: clamp(5px, 1cqw, 75px);
 
 		&_arc {
@@ -247,7 +253,7 @@
 			left: 50%;
 			cursor: pointer;
 
-			z-index: 5;
+			z-index: 4;
 
 			transform-origin: bottom center;
 
@@ -286,7 +292,7 @@
 			bottom: 0;
 			left: 50%;
 
-			z-index: 10;
+			z-index: 4;
 
 			transform: translate(-50%, 50%);
 
@@ -394,8 +400,7 @@
 		}
 
 		&_segments {
-			user-select: none;
-			aspect-ratio: 95/84;
+			user-select: none;			
 			width: 89%;
 			position: absolute;
 			top: -7%;
@@ -403,13 +408,14 @@
 			transform: translateX(-49.2%);
 
 			max-height: 104%;
-			overflow: hidden;
+			overflow: hidden;		
 
 			opacity: 0;
 			&.show {
 				animation: hideShow 0.3s ease-in-out forwards;
 			}
-		}
+		}		
+
 	}
 
 	/* Текст выбора */
@@ -425,7 +431,7 @@
 			font-size: clamp(10px, 4cqw, 40px);
 			line-height: 90%;
 			color: #000;
-			width: 35%;
+			width: 40%;
 		}
 		&_left {
 			text-align: left;
@@ -439,9 +445,9 @@
 	&-logo {
 		display: flex;
 		justify-content: flex-end;
-
+		
 		position: relative;
-		z-index: 110;
+		z-index: 9999;
 
 		margin-bottom: clamp(5px, 1.5cqw, 50px);
 
