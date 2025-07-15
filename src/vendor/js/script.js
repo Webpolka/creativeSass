@@ -622,10 +622,9 @@ class Needle {
 		muted 
 		autoplay 
 		playsinline 
-		preload="auto" 
-		poster="${videoPoster}" 
+		preload="auto" 		
 		controls
-		>
+		>   
   			<source 
 				src="${videoLink}" 				
 				type="video/mp4"
